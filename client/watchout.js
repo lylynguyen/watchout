@@ -12,6 +12,13 @@ var gameStats = {
   collisions: 0
 }
 
+var playerObject = {
+  size: 10,
+  x: gameOptions.width/2,
+  y: gameOptions.height/2,
+  color: 'blue'
+}
+
 var gameBoard = d3.select('.board').append('svg:svg')
                   .attr('width', gameOptions.width)
                   .attr('height', gameOptions.height);
@@ -20,7 +27,7 @@ var gameBoard = d3.select('.board').append('svg:svg')
 var spawnEnemies = function(){
   var positions = placeEnemies();
 
-  return gameBoard.selectAll('circle') //searches for existing circle enemies
+  return gameBoard.selectAll('circle.enemy') //searches for existing circle enemies
                   .data(positions)
                   .enter()
                   .append('svg:circle')
@@ -48,6 +55,26 @@ var placeEnemies = function(){
 
 //Creates enemies
 var gameEnemies = spawnEnemies();
+
+var drag = d3.behavior.drag()
+    .origin(function(d) { return d; })
+    .on("drag", dragmove);
+
+function dragmove(d) {
+  d3.select(this)
+      .attr("cx", d.x = Math.max(playerObject.size, Math.min(gameOptions.width - playerObject.size, d3.event.x)))
+      .attr("cy", d.y = Math.max(playerObject.size, Math.min(gameOptions.height - playerObject.size, d3.event.y)));
+}
+
+var player = gameBoard.selectAll('circle.player')
+                      .data([playerObject])
+                      .enter()
+                      .append('svg:circle')
+                        .attr('class', 'player')
+                        .attr('cx', function(p){ return p.x;})
+                        .attr('cy', function(p){ return p.y;})
+                        .attr('r', function(p){ return p.size;})
+                        .style('fill', function(p){ return p.color;}).call(drag);;
 
 //Takes in a list of enemies
 //Put those on the board

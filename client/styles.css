@@ -13,9 +13,14 @@
   /*background-color: darkgrey;*/
   border: 1px solid black;
 }
-
 .enemy {
   fill: black;
+}
+.player {
+  fill: red;
+}
+.player:hover{
+  cursor: pointer;
 }
 /* Note: an asteroid image is included in this repo.
 Feel free to use it if you like. */
