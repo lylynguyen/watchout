@@ -5,15 +5,17 @@
 }
 
 .scoreboard {
-  background-color: red;
+  background-color: lightgrey;
+  border:1px solid black;
+  padding: 5px;
 }
 .board {
-  background-color: green;
+  /*background-color: darkgrey;*/
+  border: 1px solid black;
 }
 
 .enemy {
-  fill: red;
-  background-color: black;
+  fill: black;
 }
 /* Note: an asteroid image is included in this repo.
 Feel free to use it if you like. */
