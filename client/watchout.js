@@ -2,7 +2,7 @@
 var gameOptions = {
   height: 450,
   width: 700,
-  nEnemies: 3, //number of enemies we want to have in the game
+  nEnemies: 13, //number of enemies we want to have in the game
   padding: 20
 }
 
@@ -57,8 +57,8 @@ var placeEnemies = function(){
 var gameEnemies = spawnEnemies();
 
 var drag = d3.behavior.drag()
-    .origin(function(d) { return d; })
-    .on("drag", dragmove);
+             .origin(function(d) { return d; })
+             .on("drag", dragmove);
 
 function dragmove(d) {
   d3.select(this)
@@ -74,7 +74,27 @@ var player = gameBoard.selectAll('circle.player')
                         .attr('cx', function(p){ return p.x;})
                         .attr('cy', function(p){ return p.y;})
                         .attr('r', function(p){ return p.size;})
-                        .style('fill', function(p){ return p.color;}).call(drag);;
+                        .style('fill', function(p){ return p.color;})
+                        .call(drag);
+
+var checkCollision = function(){
+  var prevX = 0;
+  var prevY = 0;
+
+  return function(){
+    var curX = Math.floor(d3.select(this).attr('cx'));
+    var curY = Math.floor(d3.select(this).attr('cy'));
+    var playX = Math.floor(player.attr('cx'));
+    var playY = Math.floor(player.attr('cy'));
+
+    if(curX !== prevX && curY !== prevY){
+      if(Math.abs(curX - playX) <= playerObject.size && Math.abs(curY - playY) <= playerObject.size){
+        gameStats.collisions++;
+        updateCollisions();
+      }
+    }
+  }
+}
 
 //Takes in a list of enemies
 //Put those on the board
@@ -82,9 +102,10 @@ var player = gameBoard.selectAll('circle.player')
 var render = function(){
   var newPositions = placeEnemies();
 
-  return gameBoard.selectAll('circle')
+  return gameBoard.selectAll('circle.enemy')
                   .data(newPositions)
                   .transition().duration(1500)
+                  .tween('print', checkCollision)
                   .attr('cx', function(enemy){ return enemy.x;})
                   .attr('cy', function(enemy){ return enemy.y;});
 }
@@ -95,7 +116,10 @@ var play = function(){
 
 play();
 
-
+var updateCollisions = function(){
+  d3.select('.collisions')
+    .text("Collisions: " + gameStats.collisions);
+}
 
 var updateScore = function(){
   d3.select('.current')
