@@ -23,6 +23,7 @@ var gameBoard = d3.select('.board').append('svg:svg')
                   .attr('width', gameOptions.width)
                   .attr('height', gameOptions.height);
 
+
 //returns a array of enemy objects to draw
 var spawnEnemies = function(){
   var positions = placeEnemies();
@@ -78,19 +79,43 @@ var player = gameBoard.selectAll('circle.player')
                         .call(drag);
 
 var checkCollision = function(){
+  //sets these once
   var prevX = 0;
   var prevY = 0;
+  var colliding = false;
 
+  //runs this a lot while transitioning
   return function(){
+    //gets values from the actual elements
     var curX = Math.floor(d3.select(this).attr('cx'));
     var curY = Math.floor(d3.select(this).attr('cy'));
     var playX = Math.floor(player.attr('cx'));
     var playY = Math.floor(player.attr('cy'));
 
+    //checks if the player is moving
     if(curX !== prevX && curY !== prevY){
+
+      //when we're in the same space on the board
       if(Math.abs(curX - playX) <= playerObject.size && Math.abs(curY - playY) <= playerObject.size){
-        gameStats.collisions++;
-        updateCollisions();
+        //only register collision one time
+        if(!colliding){
+          //count collisions
+          colliding = true;
+          gameStats.collisions++;
+          updateCollisions();
+
+          //high 
+          if(gameStats.highscore < gameStats.score){
+            gameStats.highscore = gameStats.score;
+          }
+          updateBestScore();
+
+          gameStats.score = 0;
+          updateScore();
+        }
+      }
+      else{
+        colliding = false;
       }
     }
   }
@@ -111,7 +136,12 @@ var render = function(){
 }
 
 var play = function(){
+  render();
   setInterval(render, 2000);
+  setInterval(function(){
+    gameStats.score++;
+    return updateScore();
+  }, 100);
 }
 
 play();
@@ -123,11 +153,11 @@ var updateCollisions = function(){
 
 var updateScore = function(){
   d3.select('.current')
-    .text(gameStats.score.toString());
+    .text("Current score: " + gameStats.score);
 }
 
 var updateBestScore = function(){
   gameStats.bestScore = d3.max([gameStats.bestScore, gameStats.score]);
   d3.select('.highscore')
-    .text(gameStats.bestScore.toString());
+    .text("High score: " + gameStats.bestScore);
 }
