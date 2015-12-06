@@ -24,11 +24,12 @@ var gameBoard = d3.select('.board').append('svg:svg')
                   .attr('height', gameOptions.height);
 
 
+
 //returns a array of enemy objects to draw
 var spawnEnemies = function(){
   var positions = placeEnemies();
 
-  return gameBoard.selectAll('circle.enemy') //searches for existing circle enemies
+  return gameBoard.selectAll('.enemy') //searches for existing circle enemies
                   .data(positions)
                   .enter()
                   .append('svg:circle')
@@ -92,31 +93,27 @@ var checkCollision = function(){
     var playX = Math.floor(player.attr('cx'));
     var playY = Math.floor(player.attr('cy'));
 
-    //checks if the player is moving
-    if(curX !== prevX && curY !== prevY){
-
       //when we're in the same space on the board
-      if(Math.abs(curX - playX) <= playerObject.size && Math.abs(curY - playY) <= playerObject.size){
-        //only register collision one time
-        if(!colliding){
-          //count collisions
-          colliding = true;
-          gameStats.collisions++;
-          updateCollisions();
+    if(Math.abs(curX - playX) <= playerObject.size && Math.abs(curY - playY) <= playerObject.size){
+      //only register collision one time
+      if(!colliding){
+        //count collisions
+        colliding = true;
+        gameStats.collisions++;
+        updateCollisions();
 
-          //high 
-          if(gameStats.highscore < gameStats.score){
-            gameStats.highscore = gameStats.score;
-          }
-          updateBestScore();
-
-          gameStats.score = 0;
-          updateScore();
+        //high 
+        if(gameStats.highscore < gameStats.score){
+          gameStats.highscore = gameStats.score;
         }
+        updateBestScore();
+
+        gameStats.score = 0;
+        updateScore();
       }
-      else{
-        colliding = false;
-      }
+    }
+    else{
+      colliding = false;
     }
   }
 }
@@ -127,10 +124,10 @@ var checkCollision = function(){
 var render = function(){
   var newPositions = placeEnemies();
 
-  return gameBoard.selectAll('circle.enemy')
+  return gameBoard.selectAll('.enemy')
                   .data(newPositions)
                   .transition().duration(1500)
-                  .tween('print', checkCollision)
+                  .tween('custom', checkCollision)
                   .attr('cx', function(enemy){ return enemy.x;})
                   .attr('cy', function(enemy){ return enemy.y;});
 }
