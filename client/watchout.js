@@ -3,7 +3,8 @@ var gameOptions = {
   height: 450,
   width: 700,
   nEnemies: 13, //number of enemies we want to have in the game
-  padding: 20
+  padding: 20,
+  enemySize: 40
 }
 
 var gameStats = {
@@ -13,7 +14,7 @@ var gameStats = {
 }
 
 var playerObject = {
-  size: 10,
+  size: 30,
   x: gameOptions.width/2,
   y: gameOptions.height/2,
   color: 'blue'
@@ -32,11 +33,15 @@ var spawnEnemies = function(){
   return gameBoard.selectAll('.enemy') //searches for existing circle enemies
                   .data(positions)
                   .enter()
-                  .append('svg:circle')
+                  .append('image')
                     .attr('class', 'enemy')
-                    .attr('cx', function(enemy){ return enemy.x;})
-                    .attr('cy', function(enemy){ return enemy.y;})
-                    .attr('r', 8);
+                    .attr('xlink:href', "green_ghost.svg")
+                    .attr('x', function(enemy){ return enemy.x;})
+                    .attr('y', function(enemy){ return enemy.y;})
+                    .attr('r', 8)
+                    .attr('height', gameOptions.enemySize)
+                    .attr('width', gameOptions.enemySize)
+
 }
 
 var placeEnemies = function(){
@@ -64,18 +69,20 @@ var drag = d3.behavior.drag()
 
 function dragmove(d) {
   d3.select(this)
-      .attr("cx", d.x = Math.max(playerObject.size, Math.min(gameOptions.width - playerObject.size, d3.event.x)))
-      .attr("cy", d.y = Math.max(playerObject.size, Math.min(gameOptions.height - playerObject.size, d3.event.y)));
+      .attr("x", d.x = Math.max(playerObject.size, Math.min(gameOptions.width - playerObject.size, d3.event.x)))
+      .attr("y", d.y = Math.max(playerObject.size, Math.min(gameOptions.height - playerObject.size, d3.event.y)));
 }
 
-var player = gameBoard.selectAll('circle.player')
+var player = gameBoard.selectAll('.player')
                       .data([playerObject])
                       .enter()
-                      .append('svg:circle')
+                      .append('image')
                         .attr('class', 'player')
-                        .attr('cx', function(p){ return p.x;})
-                        .attr('cy', function(p){ return p.y;})
-                        .attr('r', function(p){ return p.size;})
+                        .attr("xlink:href", 'pacman.svg')
+                        .attr('x', function(p){ return p.x;})
+                        .attr('y', function(p){ return p.y;})
+                        .attr('height', function(p){ return p.size;})
+                        .attr('width', function(p){ return p.size;})
                         .style('fill', function(p){ return p.color;})
                         .call(drag);
 
@@ -88,13 +95,13 @@ var checkCollision = function(){
   //runs this a lot while transitioning
   return function(){
     //gets values from the actual elements
-    var curX = Math.floor(d3.select(this).attr('cx'));
-    var curY = Math.floor(d3.select(this).attr('cy'));
-    var playX = Math.floor(player.attr('cx'));
-    var playY = Math.floor(player.attr('cy'));
+    var curX = Math.floor(d3.select(this).attr('x'));
+    var curY = Math.floor(d3.select(this).attr('y'));
+    var playX = Math.floor(player.attr('x'));
+    var playY = Math.floor(player.attr('y'));
 
       //when we're in the same space on the board
-    if(Math.abs(curX - playX) <= playerObject.size && Math.abs(curY - playY) <= playerObject.size){
+    if(Math.abs(curX - playX) <= gameOptions.enemySize && Math.abs(curY - playY) <= gameOptions.enemySize){
       //only register collision one time
       if(!colliding){
         //count collisions
@@ -128,8 +135,8 @@ var render = function(){
                   .data(newPositions)
                   .transition().duration(1500)
                   .tween('custom', checkCollision)
-                  .attr('cx', function(enemy){ return enemy.x;})
-                  .attr('cy', function(enemy){ return enemy.y;});
+                  .attr('x', function(enemy){ return enemy.x;})
+                  .attr('y', function(enemy){ return enemy.y;});
 }
 
 var play = function(){
